@@ -51,9 +51,15 @@ RUN wget https://ftp.drupal.org/files/projects/drupal-6.38.tar.gz \
 RUN echo 'mbstring.http_input = pass' >> /etc/php/5.6/apache2/php.ini \
     && echo 'mbstring.http_output = pass' >> /etc/php/5.6/apache2/php.ini
 
+# Add build-time argument for base URL
+ARG DRUPAL_BASE_URL=https://localhost
+
 # Copy default settings and set permissions
 RUN cp /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php \
     && sed -i "s|mysql://username:password@localhost/databasename|mysql://${DRUPAL_DB_USER}:${DRUPAL_DB_PASSWORD}@${DRUPAL_DB_HOST}/${DRUPAL_DB_NAME}|g" /var/www/html/sites/default/settings.php \
+    && echo "\$conf['reverse_proxy'] = TRUE;" >> /var/www/html/sites/default/settings.php \
+    && echo "\$conf['reverse_proxy_header'] = 'HTTP_X_FORWARDED_PROTO';" >> /var/www/html/sites/default/settings.php \
+    && echo "\$base_url = '${DRUPAL_BASE_URL}';" >> /var/www/html/sites/default/settings.php \
     && chmod 777 /var/www/html/sites/default/settings.php \
     && mkdir -p /var/www/html/sites/default/files \
     && chmod 777 /var/www/html/sites/default/files

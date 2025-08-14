@@ -23,13 +23,27 @@ drupal6-docker/
 
 1. Clone this repository
 2. Configure your environment variables in `.env` file
-3. Build and start the containers:
+3. **Generate SSL Certificates:**
+   For local development, a script is provided to generate self-signed certificates. Run the following command from the root of the project:
+   ```bash
+   ./certs/gen_certs.sh
+   ```
+   This will create `cert.pem` and `key.pem` in the `certs` directory.
+4. Build and start the containers:
    ```bash
    docker-compose up -d
    ```
-4. Access Drupal installation at http://localhost
+5. Access Drupal installation at https://localhost
 
 ## Configuration
+
+### HTTPS / SSL
+
+This setup uses an Nginx reverse proxy to handle HTTPS. By default, it uses self-signed certificates which are suitable for local development.
+
+- **Using Self-Signed Certificates:** The `gen_certs.sh` script in the `certs` directory can be used to generate self-signed certificates. These are not trusted by browsers, so you will see a warning.
+- **Using Custom Certificates:** For production, you should use valid SSL certificates. To do so, replace the `cert.pem` and `key.pem` files in the `certs` directory with your own certificate and private key. Then, restart the Nginx container: `docker-compose restart nginx`.
+
 
 ### Database Settings
 - Host: mysql
@@ -39,6 +53,7 @@ drupal6-docker/
 
 ### Environment Variables
 Edit the `.env` file to modify:
+- `DRUPAL_BASE_URL`: The base URL of the Drupal site, e.g., `https://example.com`. Defaults to `https://localhost`.
 - Database credentials
 - PHP settings
 - Other environment-specific configurations
